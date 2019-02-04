@@ -8,7 +8,7 @@ The output is supposed to be displayed in form of sequence diagrams in order to 
 
 ```python
 import my_module
-import patch
+import pyspy
 
 def trace_call(frame):
     print "Entering:", frame.f_code.co_name
@@ -16,6 +16,6 @@ def trace_call(frame):
 def trace_exit(frame):
     print "Entering:", frame.f_code.co_name
 
-patch.apply_patch(my_module.run, trace_call, trace_exit)
+pyspy.patch.apply_patch(my_module.run, trace_call, trace_exit)
 my_module.run()
 ```
