@@ -114,6 +114,28 @@ def patch_pre(fun, callback):
 def patch_return(fun, callback):
     if not can_patch(fun):
         return False
+    
+    callback_name = reg_name(getFuncAttr(fun, "func_globals"), callback)
+    
+    patch = [(LOAD_CONST, -1),
+             (LOAD_CONST, None),
+             (IMPORT_NAME, 'inspect'),
+             (STORE_FAST, 'inspect'),
+             (LOAD_FAST, 'inspect'),
+             (LOAD_ATTR, 'currentframe'),
+             (CALL_FUNCTION, 0),
+             (LOAD_GLOBAL, callback_name),
+             (ROT_TWO, None),
+             (CALL_FUNCTION, 1),
+             (POP_TOP, None)]
+    
+    code = Code.from_code(getFuncAttr(fun, "func_code"))
+    code.code[-1:-1] = patch
+    
+    setFuncAttr(fun, "func_code", code.to_code())
+    
+    return True
+
 
 def patch_calls(fun, callback, **kw):
     if not can_patch(fun):
