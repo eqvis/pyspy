@@ -34,10 +34,9 @@ def go(name):
     #with file(name) as f:
     #   sort_file(f)
 
-def trace(*args):
-    return trace
-
 if __name__=='__main__':
+    def trace(*args):
+        return trace
     import sys
     sys.settrace(trace)
     

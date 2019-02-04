@@ -188,3 +188,36 @@ def patch_calls(fun, callback, **kw):
 
     setFuncAttr(fun, "func_code", cur_code.to_code())
     
+
+def before_call(fun):
+    if not can_patch(fun):
+        print "???: Calling builtin", fun
+        return 1, 0
+        
+    res = patch_trace(fun)
+    
+    return res
+
+before_call._pyspy_skip = 1
+
+def patch_trace(fun):
+    patch_calls(fun, before_call)
+
+    if hasattr(fun, 'func_code'):
+        if patch_trace._trace_call and hasattr(patch_trace._trace_call, "__call__"):
+            patch_pre(fun, patch_trace._trace_call)
+        if patch_trace._trace_return and hasattr(patch_trace._trace_return, "__call__"):
+            patch_return(fun, patch_trace._trace_return)
+    
+#    if patch.patch_calls(fun, before_call):
+    return PATCH_NOMORE, None
+
+patch_trace._trace_call = None
+patch_trace._trace_return = None
+
+def apply_patch(fun_to_patch, callback_before=None, callback_after=None):
+    patch_trace._trace_call = callback_before
+    patch_trace._trace_return = callback_after
+    
+    patch_trace(fun_to_patch)
+        
